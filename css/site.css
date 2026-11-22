@@ -171,7 +171,7 @@ em { font-style: italic; }
 
 /* the big quarter circle, hung off the left edge */
 .quarter { width: min(100%, 420px); aspect-ratio: 1; }
-.quarter svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.quarter svg { width: 100%; height: 100%; display: block; overflow: hidden; }
 .q-shape { fill: var(--island); }
 .q-track { fill: none; stroke: rgba(255, 255, 255, 0.14); stroke-width: 14; stroke-linecap: round; }
 .q-val { fill: none; stroke: var(--on-island); stroke-width: 14; stroke-linecap: round; }
