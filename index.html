@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CornerWindow: a quick panel in your screen corner</title>
 <meta name="description" content="CornerWindow is a tiny quarter-circle in a corner of your Linux desktop that springs open into brightness, sound, media, toggles and a command bar.">
-<meta name="theme-color" content="#D9DFE5">
+<meta name="theme-color" content="#D9DFE5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1E252C" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23D9DFE5'/%3E%3Cpath d='M32 0v20A20 20 0 0 1 12 0z' fill='%23000'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,7 +17,6 @@
 
 <a class="skip" href="#main">Skip to content</a>
 
-<!-- ───────────────────────── the page (dimmed by the demo) ───────────────────────── -->
 <div id="page">
 
 <header class="masthead">
@@ -35,10 +35,10 @@
 <main id="main">
 
 <section class="hero" id="top">
-  <p class="corner-note" aria-hidden="true">
-    <span>That one is real. Click it, or scroll on it.</span>
-    <svg viewBox="0 0 90 60" class="corner-arrow"><path d="M4 56 C 30 52, 60 40, 80 8"/><path d="M68 10 L 81 6 L 82 20"/></svg>
-  </p>
+  <div class="hero-shape" id="hero-shape" role="button" tabindex="0" aria-label="Fold the panel outline back into the corner" aria-pressed="true">
+    <svg id="hero-svg" aria-hidden="true"><path id="hero-path"/></svg>
+    <p class="shape-caption">Click to fold it back into the corner.</p>
+  </div>
 
   <div class="hero-copy">
     <h1>Your screen has four corners. Put one to work.</h1>
@@ -55,7 +55,7 @@
 <section class="band" id="closed">
   <div class="split">
     <div class="edge-left island-wrap">
-      <div class="quarter" id="big-quarter" title="Scroll here to change brightness, Shift+scroll for volume">
+      <div class="quarter" id="big-quarter">
         <svg viewBox="0 0 320 320" aria-hidden="true">
           <path class="q-shape" d="M0 0H320A320 320 0 0 1 0 320Z"/>
           <path class="q-track" id="bq-track" d=""/>
@@ -110,23 +110,19 @@
     <div class="split-copy">
       <h2>Or just start typing.</h2>
       <p>With the panel open, type anywhere and the command bar picks it up. Numbers set things, words apply presets, and sums get answered. <kbd>Enter</kbd> runs it, or copies the answer.</p>
-      <p class="aside">This bar is wired to the panel in the corner. Try it.</p>
     </div>
-    <div class="cmd-demo">
-      <label class="sr-only" for="demo-cmd">Command</label>
-      <div class="cmd-pill">
-        <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg>
-        <input id="demo-cmd" type="text" autocomplete="off" spellcheck="false" placeholder="Type a command or a sum">
-      </div>
-      <p class="cmd-hint" id="demo-hint" aria-live="polite">Try one of these:</p>
-      <ul class="cmd-examples">
-        <li><button type="button" data-try="b 40"><code>b 40</code><span>brightness to 40</span></button></li>
-        <li><button type="button" data-try="night"><code>night</code><span>the Night preset</span></button></li>
-        <li><button type="button" data-try="timer 1"><code>timer 1</code><span>a one-minute timer</span></button></li>
-        <li><button type="button" data-try="mute"><code>mute</code><span>mute output</span></button></li>
-        <li><button type="button" data-try="2*(3+4)"><code>2*(3+4)</code><span>a sum to copy</span></button></li>
-        <li><button type="button" data-try="day"><code>day</code><span>back to normal</span></button></li>
-      </ul>
+    <div>
+      <table class="gestures commands">
+        <caption class="sr-only">Command bar examples</caption>
+        <tbody>
+          <tr><th scope="row"><code>b 40</code></th><td>Set brightness to 40</td></tr>
+          <tr><th scope="row"><code>night</code></th><td>Apply the Night preset</td></tr>
+          <tr><th scope="row"><code>timer 10</code></th><td>Start a 10-minute timer</td></tr>
+          <tr><th scope="row"><code>mute</code></th><td>Mute output</td></tr>
+          <tr><th scope="row"><code>2*(3+4)</code></th><td>Calculate; <kbd>Enter</kbd> copies the answer</td></tr>
+        </tbody>
+      </table>
+      <p class="aside"><code>c</code>, <code>v</code>, <code>t</code>, <code>lock</code> and more are in there too.</p>
     </div>
   </div>
 </section>
@@ -154,7 +150,7 @@
     <div class="glass-controls">
       <label>Frost <input type="range" id="frost" min="0" max="1" step="0.01" value="0.5"></label>
       <label>Tint <input type="range" id="tint" min="0" max="1" step="0.01" value="0.5"></label>
-      <button type="button" class="btn btn-solid" id="glass-panel-btn">Use glass on the panel</button>
+      <p>Turn it on with the <em>Glass</em> quick toggle, in Settings, or with <code>cornerwindow set panel.glass true</code>. It switches instantly.</p>
       <p class="aside">On X11 the backdrop is live: a video or a window you drag shows through as it moves. When nothing behind changes, nothing is redrawn.</p>
     </div>
   </div>
@@ -185,8 +181,10 @@
         <label>Response <output id="resp-out">0.42 s</output><input type="range" id="resp" min="0.15" max="1.2" step="0.01" value="0.42"></label>
         <label>Damping <output id="damp-out">0.78</output><input type="range" id="damp" min="0.2" max="1.2" step="0.01" value="0.78"></label>
       </div>
-      <p class="aside">These two sliders drive the panel in the corner too. Set damping low and open it.</p>
-      <button type="button" class="btn btn-line" id="spring-open">Open the panel</button>
+      <div class="spring-preview">
+        <div class="mini-screen" id="mini-screen" role="button" tabindex="0" aria-label="Play the open animation with these settings"><svg id="mini-svg" aria-hidden="true"><path id="mini-path"/></svg></div>
+        <p class="aside">Click the little screen to open and close it with these settings. Try damping below 0.5.</p>
+      </div>
     </div>
   </div>
 </section>
@@ -248,149 +246,6 @@ columns = [["header", "display", "audio"],
 </footer>
 
 </div><!-- /#page -->
-
-<div class="night-veil" id="night-veil" aria-hidden="true"></div>
-
-<!-- ───────────────────────── the island ───────────────────────── -->
-<div class="cw" id="cw">
-  <svg class="cw-shape" id="cw-shape" aria-hidden="true">
-    <defs>
-      <linearGradient id="cw-rim" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#fff" stop-opacity=".95"/>
-        <stop offset=".5" stop-color="#fff" stop-opacity=".25"/>
-        <stop offset="1" stop-color="#fff" stop-opacity=".6"/>
-      </linearGradient>
-    </defs>
-    <path id="cw-path" class="cw-path"/>
-  </svg>
-
-  <div class="cw-content" id="cw-content">
-    <div class="cw-inner" id="cw-inner" role="dialog" aria-label="CornerWindow panel" aria-modal="false">
-      <div class="cw-top">
-        <div class="cw-card cw-cmd">
-          <svg class="cw-i" data-icon="search"></svg>
-          <input id="cw-cmd" type="text" autocomplete="off" spellcheck="false" placeholder="Type a command or a sum" aria-label="Command bar">
-          <span class="cw-cmd-hint" id="cw-cmd-hint" aria-live="polite"></span>
-        </div>
-      </div>
-      <div class="cw-cols">
-        <div class="cw-col">
-          <div class="cw-card" data-card="display">
-            <div class="cw-title">Display</div>
-            <div class="cw-slider" data-key="brightness" role="slider" tabindex="0" aria-label="Brightness" aria-valuemin="0" aria-valuemax="100"><div class="cw-fill"></div><svg class="cw-i" data-icon="sun"></svg><span class="cw-sval"></span></div>
-            <div class="cw-slider" data-key="contrast" role="slider" tabindex="0" aria-label="Contrast" aria-valuemin="0" aria-valuemax="100"><div class="cw-fill"></div><svg class="cw-i" data-icon="contrast"></svg><span class="cw-sval"></span></div>
-            <div class="cw-chips" role="group" aria-label="Display presets">
-              <button class="cw-chip" data-preset="day">Day</button><button class="cw-chip" data-preset="evening">Evening</button><button class="cw-chip" data-preset="night">Night</button><button class="cw-chip" data-preset="movie">Movie</button>
-            </div>
-          </div>
-          <div class="cw-card" data-card="audio">
-            <div class="cw-title">Sound</div>
-            <div class="cw-row">
-              <div class="cw-slider" data-key="volume" role="slider" tabindex="0" aria-label="Volume" aria-valuemin="0" aria-valuemax="100"><div class="cw-fill"></div><svg class="cw-i" data-icon="volume"></svg><span class="cw-sval"></span></div>
-              <button class="cw-icon" data-toggle="mic" aria-label="Mute microphone" aria-pressed="false"><svg class="cw-i" data-icon="mic"></svg></button>
-            </div>
-            <button class="cw-device" id="cw-device"><svg class="cw-i" data-icon="speaker"></svg><span id="cw-device-name">Speakers</span><svg class="cw-i cw-chev" data-icon="chev"></svg></button>
-          </div>
-          <div class="cw-card" data-card="media">
-            <div class="cw-media">
-              <div class="cw-art" id="cw-art" aria-hidden="true"></div>
-              <div class="cw-meta">
-                <div class="cw-strong" id="cw-track">Low Tide</div>
-                <div class="cw-dim cw-small" id="cw-artist">Quarter Circle Band</div>
-                <div class="cw-progress"><div id="cw-prog"></div></div>
-              </div>
-            </div>
-            <div class="cw-transport">
-              <button class="cw-icon cw-plain" id="cw-prev" aria-label="Previous"><svg class="cw-i" data-icon="prev"></svg></button>
-              <button class="cw-icon cw-big" id="cw-play" aria-label="Pause"><svg class="cw-i" data-icon="pause"></svg></button>
-              <button class="cw-icon cw-plain" id="cw-next" aria-label="Next"><svg class="cw-i" data-icon="next"></svg></button>
-            </div>
-          </div>
-          <div class="cw-card" data-card="glance">
-            <div class="cw-title">System</div>
-            <div class="cw-glance">
-              <div><span class="cw-dim cw-small">CPU</span><span class="cw-num" id="g-cpu">12%</span><svg class="cw-spark" viewBox="0 0 100 24" preserveAspectRatio="none"><polyline id="s-cpu"/></svg></div>
-              <div><span class="cw-dim cw-small">GPU</span><span class="cw-num" id="g-gpu">4%</span><svg class="cw-spark" viewBox="0 0 100 24" preserveAspectRatio="none"><polyline id="s-gpu"/></svg></div>
-              <div><span class="cw-dim cw-small">Memory</span><span class="cw-num" id="g-mem">5.1 GB</span><svg class="cw-spark" viewBox="0 0 100 24" preserveAspectRatio="none"><polyline id="s-mem"/></svg></div>
-              <div><span class="cw-dim cw-small">Network</span><span class="cw-num" id="g-net">320 KB/s</span><svg class="cw-spark" viewBox="0 0 100 24" preserveAspectRatio="none"><polyline id="s-net"/></svg></div>
-            </div>
-            <div class="cw-dim cw-small cw-foot">Disk 212 GB free, up <span id="g-up">3 h 12 min</span></div>
-          </div>
-        </div>
-        <div class="cw-col">
-          <div class="cw-card cw-flat" data-card="header">
-            <div class="cw-header">
-              <div>
-                <div class="cw-clock" id="cw-clock">12:00</div>
-                <div class="cw-date" id="cw-date">Sunday, 22 November</div>
-              </div>
-              <div class="cw-hbtns">
-                <button class="cw-icon" id="cw-pin" aria-label="Keep open" aria-pressed="false"><svg class="cw-i" data-icon="pin"></svg></button>
-                <button class="cw-icon" id="cw-gear" aria-label="Settings"><svg class="cw-i" data-icon="gear"></svg></button>
-              </div>
-            </div>
-          </div>
-          <div class="cw-card" data-card="toggles">
-            <div class="cw-tiles">
-              <button class="cw-tile" data-toggle="wifi" aria-pressed="true"><span class="cw-disc"><svg class="cw-i" data-icon="wifi"></svg></span><span>Wi-Fi</span></button>
-              <button class="cw-tile" data-toggle="bt" aria-pressed="true"><span class="cw-disc"><svg class="cw-i" data-icon="bt"></svg></span><span>Bluetooth</span></button>
-              <button class="cw-tile" data-toggle="night" aria-pressed="false"><span class="cw-disc"><svg class="cw-i" data-icon="moon"></svg></span><span>Night light</span></button>
-              <button class="cw-tile" data-toggle="dark" aria-pressed="false"><span class="cw-disc"><svg class="cw-i" data-icon="half"></svg></span><span>Dark</span></button>
-              <button class="cw-tile" data-toggle="dnd" aria-pressed="false"><span class="cw-disc"><svg class="cw-i" data-icon="focus"></svg></span><span>Focus</span></button>
-              <button class="cw-tile" data-toggle="awake" aria-pressed="false"><span class="cw-disc"><svg class="cw-i" data-icon="cup"></svg></span><span>Awake</span></button>
-              <button class="cw-tile" data-toggle="mic" aria-pressed="false"><span class="cw-disc"><svg class="cw-i" data-icon="micoff"></svg></span><span>Mic mute</span></button>
-              <button class="cw-tile" data-toggle="glass" aria-pressed="false"><span class="cw-disc"><svg class="cw-i" data-icon="drop"></svg></span><span>Glass</span></button>
-            </div>
-          </div>
-          <div class="cw-card" data-card="drawer">
-            <div class="cw-tabs" role="tablist" aria-label="Drawer">
-              <button role="tab" class="cw-tab" data-tab="timer" aria-selected="true">Timer</button>
-              <button role="tab" class="cw-tab" data-tab="clipboard" aria-selected="false">Clipboard</button>
-              <button role="tab" class="cw-tab" data-tab="notes" aria-selected="false">Notes</button>
-            </div>
-            <div class="cw-pane" data-pane="timer">
-              <div class="cw-timer-read cw-num" id="cw-timer-read">0:00</div>
-              <div class="cw-chips">
-                <button class="cw-chip" data-min="1">1 min</button><button class="cw-chip" data-min="5">5</button><button class="cw-chip" data-min="10">10</button><button class="cw-chip" data-min="25">25</button><button class="cw-chip" id="cw-timer-stop">Stop</button>
-              </div>
-            </div>
-            <div class="cw-pane" data-pane="clipboard" hidden>
-              <ul class="cw-clips" id="cw-clips"></ul>
-            </div>
-            <div class="cw-pane" data-pane="notes" hidden>
-              <textarea class="cw-notes" id="cw-notes" aria-label="Notes" placeholder="Anything you write here saves itself."></textarea>
-            </div>
-          </div>
-          <div class="cw-card" data-card="power">
-            <div class="cw-power">
-              <button class="cw-hold" data-power="lock"><span class="cw-hdisc"><svg class="cw-ring" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18"/></svg><svg class="cw-i" data-icon="lock"></svg></span><span>Lock</span></button>
-              <button class="cw-hold" data-power="sleep"><span class="cw-hdisc"><svg class="cw-ring" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18"/></svg><svg class="cw-i" data-icon="sleep"></svg></span><span>Sleep</span></button>
-              <button class="cw-hold" data-power="restart"><span class="cw-hdisc"><svg class="cw-ring" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18"/></svg><svg class="cw-i" data-icon="restart"></svg></span><span>Restart</span></button>
-              <button class="cw-hold" data-power="off"><span class="cw-hdisc"><svg class="cw-ring" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18"/></svg><svg class="cw-i" data-icon="power"></svg></span><span>Shut down</span></button>
-            </div>
-            <div class="cw-dim cw-small cw-foot" id="cw-power-hint">Press and hold to confirm.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <svg class="cw-activity" id="cw-activity" aria-hidden="true">
-    <path id="act-track" class="act-track"/>
-    <path id="act-val" class="act-val"/>
-    <path id="act-ring" class="act-ring"/>
-    <text id="act-num" class="act-num" text-anchor="middle"></text>
-    <circle id="dot-mic" class="dot-mic" r="2.6"/>
-    <circle id="dot-awake" class="dot-awake" r="2.6"/>
-  </svg>
-
-  <button class="cw-trigger" id="cw-trigger" aria-label="Open CornerWindow" aria-expanded="false" aria-controls="cw-inner"></button>
-</div>
-
-<div class="screen-overlay" id="overlay" hidden>
-  <div class="ov-clock" id="ov-clock">12:00</div>
-  <p id="ov-text">Click or press a key to unlock.</p>
-</div>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
